@@ -16,18 +16,18 @@ tf.keras.backend.clear_session()
 random.seed(time.clock())
 
 # ==== constants
-d_model=16
+d_model=16 # Your desired dimension for the model
 dff = 16
 input_vocab_size = 8500
 target_vocab_size = 8000
-d_meds=10
-d_diags=10
-d_demogs=2
-num_time_steps = 120
-num_classes=2
+d_meds=10 # Dimension of the medication stream. 
+d_diags=10 # Dimension of the diagnoses stream.
+d_demogs=2 # Dimension of the demographic stream.
+num_time_steps = 120 # Maximum number of time steps for the patients.
+num_classes=2 # Number of classes
 one=1
 two=2
-num_thresholds=100
+num_thresholds=100 
 
 # ======================= Generating a set of model parameters randomely
 learning_rate_pool =[0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001]
@@ -103,7 +103,7 @@ def positional_encoding(position, d_model):
 # ==== This fnction masks the information after the last visit of the patients
 def create_padding_mask(meds, diags): 
   """
-  Inputs are medication and diagnoses streams 
+  Inputs are medication and diagnoses streams. 
   This function finds the maximum index where the features (for either medication or diagnoses) 
   are not zero for a visit i, and then creates a mask matrix to mask out everything after the last non-zero visit i.
   """
@@ -182,7 +182,14 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     return tf.transpose(x, perm=[0, 2, 1, 3])
     
   def call(self, medications, diagnoses, mask):
-   
+    """
+    Creates Query, Key, and Value for the medication and diagnoses streams seperately.
+    All possible permutations of the stream are used to determine the attention weights between 
+    different visits and across streams. 
+    Attentions are then passed through a set of dense layers to generate outputs.
+    Given two data streams M (stands for medications) and D (stands for diagnoses), we can generate three permutations i.e. MM, MD, and DD.
+
+    """
     batch_size = tf.shape(medications)[0]
 
     # ===== Creating q, k, v for both medications and diagnoses streams using different dense layers 
@@ -377,11 +384,14 @@ def train_step(medications, diagnoses, demog_info, tar):
   return predictions, myLoss_temp, tar, logits#, tar_real, enc_padding_mask, combined_mask, dec_padding_mask
 
 #===================== READING VALIDATION DATA ====================================
-validation_filename_meds='validation_medications_represented.csv'
-validation_filename_diags='validation_diagnoses_represented.csv'
-validation_filename_demogs='validation_demogs_shuffled_balanced.csv'
-validationset_meds = ReadingData(path_t=validation_filename_meds)#, path_l=validation_labels_filename)#,path_s=validation_lengths_filename)
-validationset_diags = ReadingData(path_t=validation_filename_diags)#, path_l=validation_labels_filename)#,path_s=validation_lengths_filename)
+# Medication stream format is n by m, where n is the number of patients and each row is [PATIENT ID, VISIT DATE 0, A MULTI_HOT VECTOR OF SIZE d_med, VISIT DATE 1, A MULTI_HOT VECTOR OF SIZE d_med, ... , VISIT DATE 120, A MULTI_HOT VECTOR OF SIZE d_med, LABEL POSITIVE, LABEL NEGATIVE, START, NUMBER OF VISITS, ID]
+validation_filename_meds='THE MEDICATION STREAM OF YOUR VALIDATION SET.csv' 
+# Medication stream format is n by m, where n is the number of patients and each row is [PATIENT ID, VISIT DATE 0, A MULTI_HOT VECTOR OF SIZE d_diag, VISIT DATE 1, A MULTI_HOT VECTOR OF SIZE d_diag, ... , VISIT DATE 120, A MULTI_HOT VECTOR OF SIZE d_diag, LABEL POSITIVE, LABEL NEGATIVE, START, NUMBER OF VISITS, ID]
+validation_filename_diags='THE DIAGNOSES STREAM OF YOUR VALIDATION SET.csv'
+# Medication stream format is n by m, where n is the number of patients and each row is [PATIENT ID, VISIT DATE 0, A MULTI_HOT VECTOR OF SIZE d_demog, VISIT DATE 1, A MULTI_HOT VECTOR OF SIZE d_demog, ... , VISIT DATE 120, A MULTI_HOT VECTOR OF SIZE d_demog, LABEL POSITIVE, LABEL NEGATIVE, START, NUMBER OF VISITS, ID]
+validation_filename_demogs='THE DEMOGRAPHIC STREAM OF YOUR VALIDATION SET.csv'
+validationset_meds = ReadingData(path_t=validation_filename_meds)
+validationset_diags = ReadingData(path_t=validation_filename_diags)
 validation_demogs = ReadingData(path_t=validation_filename_demogs)
 #===== Validation meds
 validation_data = validationset_meds.data
@@ -412,9 +422,9 @@ if (sum( validation_meds_enrolids != validation_diags_enrolids ) != 0) or (sum(v
   print("Error: enrolids don't match")
   pdb.set_trace()
 # ========= Reading training data
-train_filename_meds='training_medications_represented.csv'
-train_filename_diags='training_diagnoses_represented.csv'
-train_filename_demogs = 'training_demogs_shuffled_balanced.csv'
+train_filename_meds='THE MEDICATION STREAM OF YOUR TRAINING SET.csv'
+train_filename_diags='THE DIAGNOSES STREAM OF YOUR TRAINING SET.csv'
+train_filename_demogs = 'THE DEMOGRAPHIC STREAM OF YOUR VALIDATION SET.csv'
 
 trainset_meds = ReadingData(path_t=train_filename_meds)
 trainset_diags = ReadingData(path_t=train_filename_diags)
