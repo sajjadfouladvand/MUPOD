@@ -23,7 +23,6 @@ target_vocab_size = 8000
 d_meds=10
 d_diags=10
 d_demogs=2
-zero=0
 num_time_steps = 120
 num_classes=2
 one=1
