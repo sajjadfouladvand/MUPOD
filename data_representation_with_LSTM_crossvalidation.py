@@ -5,6 +5,20 @@ Created in March 2021
 
 This code train a LSTM model using the medication streams and represent the medication stream using the LSTM. 
 This code is for parameter tuning and the LSTM model designing and structure is in data_representation_with_LSTM_model
+@title Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+WRITTEN BY Sajjad Fouladvand (sjjd.fouladvand@gmail.com) based on Google implementation of Transformer here: https://github.com/tensorflow/docs/blob/master/site/en/tutorials/text/transformer.ipynb
+
 """
 
 import  data_representation_with_LSTM_model as lsad
